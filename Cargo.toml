@@ -12,7 +12,7 @@ keywords = ["xendit", "sdk"]
 categories = ["xendit", "sdk"]
 
 [dependencies]
-reqwest = "0.12.4"
+reqwest = {version="0.12.4", features = ["json"] }
 serde = "1.0.200"
 serde_json = "1.0.116"
 tokio = "1.37.0"
