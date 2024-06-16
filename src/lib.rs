@@ -6,3 +6,4 @@ pub mod payment_request;
 pub mod payout;
 pub mod refund;
 pub mod client;
+pub mod common;

@@ -11,7 +11,12 @@ pub trait QueryParams {
 }
 impl<T:Serialize> QueryParams for T {
     fn to_query_params(&self) -> String {
-        serde_urlencoded::to_string(self).unwrap()
+        match serde_qs::to_string(self) {
+            Ok(query_string) => query_string,
+            Err(error) => {
+                panic!("Error: {}", error);
+            }
+        }
     }
 }
 
