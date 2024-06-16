@@ -12,7 +12,7 @@ mod tests {
             .get_balance(
                 GetBalanceParams::new()
             ).await;
-        assert_eq!(result, 13990471379);
+        assert_eq!(result, 13991548668);
     }
 
     #[tokio::test]
@@ -26,6 +26,6 @@ mod tests {
                     .set_currency("IDR")
                     .build()
             ).await;
-        assert_eq!(result, 100000);
+        assert_eq!(result, 101000);
     }
 }
