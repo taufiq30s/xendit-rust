@@ -174,17 +174,13 @@ impl<'a> TransactionClient<'a> {
             client
         }
     }
-    pub async fn list(&self, params: TransactionListParams) -> Result<TransactionListObject, reqwest::Error> {
-        match self.client.get_with_params::<TransactionListObject, _>("/transactions", params).await {
-            Ok(res) => Ok(res),
-            Err(err) => Err(err)
-        }
+    pub async fn list(&self, params: TransactionListParams) -> Result<TransactionListObject, Box<dyn std::error::Error>> {
+        let result = self.client.get_with_params::<TransactionListObject, _>("/transactions", params).await?;
+        Ok(result)
     }
-    pub async fn get(&self, id: String) -> Result<TransactionObject, reqwest::Error> {
-        match self.client.get(&format!("/transactions/{}", id)).await {
-            Ok(res) => Ok(res),
-            Err(err) => Err(err)
-        }
+    pub async fn get(&self, id: String) -> Result<TransactionObject, Box<dyn std::error::Error>> {
+        let result = self.client.get(&format!("/transactions/{}", id)).await?;
+        Ok(result)
     }
 }
 
