@@ -55,14 +55,11 @@ impl<'a> BalanceClient<'a> {
             client
         }
     }
-    pub async fn get_balance(&self, params: GetBalanceParams) -> u64 {
+    pub async fn get_balance(&self, params: GetBalanceParams) -> Result<u64, Box<dyn std::error::Error>> {
         let result = self.client.get_with_params::<BalanceModel, _>(
             "/balance", 
             params
-        ).await;
-        match result {
-            Ok(balance) => balance.balance,
-            Err(e) => panic!("{}", e)
-        }
+        ).await?;
+        Ok(result.balance)
     }
 }
