@@ -62,11 +62,12 @@ impl XenditClient {
         B: serde::Serialize
         >(&self, endpoint: &str, body: &B) -> Result<T, Box<dyn std::error::Error>> {
         let url: String = format!("{}{}", API_BASE_URL, endpoint);
-        let response = self.client.post(&url)
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .json(body)
-            .send()
-            .await?;
+        let request_builder: reqwest::RequestBuilder = self.client.post(&url)
+            .header("Authorization", format!("Basic {}", self.api_key));
+        let response = match serde_json::to_value(body)?.is_null() {
+            true => request_builder.send().await?,
+            false => request_builder.json(body).send().await?,
+        };
         let data = response.json::<T>().await?;
         Ok(data)
     }
