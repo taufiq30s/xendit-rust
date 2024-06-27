@@ -1,3 +1,5 @@
+use core::fmt;
+
 use data_encoding::BASE64;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -14,6 +16,33 @@ impl<T:Serialize> QueryParams for T {
         serde_qs::to_string(self).map_err(
             |e| 
             format!("Failed to serialize query parameters: {}", e))
+    }
+}
+
+// Create Struct to Handle Error Responses
+// from API
+#[derive(Deserialize)]
+pub struct ApiErrorResponse {
+    message: String,
+    error_code: String,
+    errors: Vec<ApiErrorDetail>,
+}
+impl fmt::Display for ApiErrorResponse {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "\nmessage: {}, error_code: {}, errors: \n{:?}", self.message, self.error_code, self.errors)
+    }
+}
+
+#[derive(Deserialize)]
+pub struct ApiErrorDetail {
+    field: Vec<String>,
+    location: String,
+    messages: Vec<String>,
+    types: Vec<String>,
+}
+impl fmt::Debug for ApiErrorDetail {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "\n\tfield: {:?}, location: {}, messages: {:?}, types: {:?}", self.field, self.location, self.messages, self.types)
     }
 }
 
@@ -38,6 +67,10 @@ impl XenditClient {
             .header("Authorization", format!("Basic {}", self.api_key))
             .send()
             .await?;
+        if response.status() != reqwest::StatusCode::OK {
+            let error_response = response.json::<ApiErrorResponse>().await?;
+            return Err(format!("API Error: {}", error_response).into());
+        }
         let data = response.json::<T>().await?;
         Ok(data)
     }
@@ -53,6 +86,10 @@ impl XenditClient {
             .header("Authorization", format!("Basic {}", self.api_key))
             .send()
             .await?;
+        if response.status() != reqwest::StatusCode::OK {
+            let error_response = response.json::<ApiErrorResponse>().await?;
+            return Err(format!("API Error: {}", error_response).into());
+        }
         let data = response.json::<T>().await?;
         Ok(data)
     }
@@ -68,6 +105,10 @@ impl XenditClient {
             true => request_builder.send().await?,
             false => request_builder.json(body).send().await?,
         };
+        if response.status() != reqwest::StatusCode::OK {
+            let error_response = response.json::<ApiErrorResponse>().await?;
+            return Err(format!("API Error: {}", error_response).into());
+        }
         let data = response.json::<T>().await?;
         Ok(data)
     }
