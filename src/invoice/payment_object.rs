@@ -7,12 +7,13 @@ pub struct Bank {
     pub transfer_amount: f64,           // Will be deprected soon
     pub bank_branch: String,
     pub account_holder_name: String,
+    pub identity_amount: Option<f64>,
 }
 
 #[derive(Deserialize)]
 pub struct RetailOutlet {
     pub retail_outlet_name: String,
-    pub transfer_amount: f64        // Will be depracted
+    pub transfer_amount: Option<f64>        // Will be depracted
 }
 
 #[derive(Deserialize)]
