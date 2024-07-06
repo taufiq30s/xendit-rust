@@ -103,19 +103,9 @@ impl XenditClient {
         T: for<'de> Deserialize<'de>,
         P: QueryParams>
         (&self, endpoint: &str, params: P) -> Result<T, Box<dyn std::error::Error>> {
-        let url = format!("{}/{}", API_BASE_URL, endpoint);
         let query_string = params.to_query_params()?;
-        let full_url = format!("{}?{}", url, query_string);
-        let response = self.client.get(&full_url)
-            .header("Authorization", format!("Basic {}", self.api_key))
-            .send()
-            .await?;
-        if response.status() != reqwest::StatusCode::OK {
-            let error_response = response.json::<ApiErrorResponse>().await?;
-            return Err(format!("API Error\n{}", error_response).into());
-        }
-        let data = response.json::<T>().await?;
-        Ok(data)
+        let full_url = format!("{}?{}", endpoint, query_string);
+        self.get::<T>(&full_url).await
     }
 
     pub(super) async fn post<
