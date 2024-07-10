@@ -21,7 +21,7 @@ mod tests {
                 .build())
             .build();
         assert!(
-            match PaymentMethodClient::new(&client).create_payment_method(body).await {
+            match PaymentMethodClient::new(&client).create_payment_method(body, None).await {
                 Ok(payment_method) => !payment_method.id.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -44,7 +44,7 @@ mod tests {
                 .build())
             .build();
         assert!(
-            match PaymentMethodClient::new(&client).create_payment_method(body).await {
+            match PaymentMethodClient::new(&client).create_payment_method(body, None).await {
                 Ok(payment_method) => !payment_method.id.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -65,11 +65,11 @@ mod tests {
                 .set_mobile_number(String::from("62817555493"))
                 .build())
             .build();
-        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body).await.unwrap();
+        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body, None).await.unwrap();
 
         // Get Payment Method by ID
         assert!(
-            match PaymentMethodClient::new(&client).get_payment_method_by_id(&payment_method.id).await {
+            match PaymentMethodClient::new(&client).get_payment_method_by_id(&payment_method.id, None).await {
                 Ok(payment_method) => !payment_method.id.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -92,7 +92,7 @@ mod tests {
                 .set_expires_at(chrono::Utc::now() + Duration::days(2))
                 .build())
             .build();
-        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body).await.unwrap();
+        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body, None).await.unwrap();
         sleep(std::time::Duration::from_millis(500)).await;
 
         // Update payment method
@@ -103,7 +103,7 @@ mod tests {
                 .build())
             .build();
         assert!(
-            match PaymentMethodClient::new(&client).patch_payment_method(&payment_method.id, updated_body).await {
+            match PaymentMethodClient::new(&client).patch_payment_method(&payment_method.id, updated_body, None).await {
                 Ok(payment_method) => !payment_method.id.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -117,7 +117,7 @@ mod tests {
     async fn get_all_payment_methods() {
         let client = initialize_client();
         assert!(
-            match PaymentMethodClient::new(&client).get_all_payment_methods(None).await {
+            match PaymentMethodClient::new(&client).get_all_payment_methods(None, None).await {
                 Ok(payment_methods) => !payment_methods.data.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -138,7 +138,7 @@ mod tests {
             .set_limit(5)
             .build();
         assert!(
-            match PaymentMethodClient::new(&client).get_all_payment_methods(Some(params)).await {
+            match PaymentMethodClient::new(&client).get_all_payment_methods(Some(params), None).await {
                 Ok(payment_methods) => !payment_methods.data.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -161,11 +161,11 @@ mod tests {
                 .set_expires_at(chrono::Utc::now() + Duration::days(2))
                 .build())
             .build();
-        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body).await.unwrap();
+        let payment_method = PaymentMethodClient::new(&client).create_payment_method(body, None).await.unwrap();
 
         // Expire payment method
         assert!(
-            match PaymentMethodClient::new(&client).expire_payment_method(&payment_method.id, None).await {
+            match PaymentMethodClient::new(&client).expire_payment_method(&payment_method.id, None, None).await {
                 Ok(payment_method) => !payment_method.id.is_empty(),
                 Err(e) => {
                     println!("{}", e);
@@ -189,7 +189,7 @@ mod tests {
                 .set_expires_at(chrono::Utc::now() + Duration::days(2))
                 .build())
             .build();
-        let payment_method = payment_method_client.create_payment_method(body).await.unwrap();
+        let payment_method = payment_method_client.create_payment_method(body, None).await.unwrap();
         sleep(std::time::Duration::from_millis(500)).await;
 
         // Simulate payment (set payment was success)
@@ -199,7 +199,7 @@ mod tests {
 
         // Execute
         assert!(
-            match payment_method_client.get_payments_by_payment_method_id("pm-e64c59c3-8f25-4e70-abc1-cc2d1973780d".to_string(), None).await {
+            match payment_method_client.get_payments_by_payment_method_id("pm-e64c59c3-8f25-4e70-abc1-cc2d1973780d".to_string(), None, None).await {
                 Ok(payment) => !payment.data.is_empty(),
                 Err(e) => {
                     println!("{}", e);

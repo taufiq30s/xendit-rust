@@ -1,26 +1,29 @@
 use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
+use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::skip_serializing_none;
 
 use crate::{client::XenditClient, common::date_filter::DateFilter, invoice::Address};
 
-use super::payment_method_parameters::{self as PaymentMethodObject, OverTheCounterParameterUpdate, PaymentType, Reusability, VirtualAccountParameterUpdate};
-
+use super::payment_method_parameters::{
+    self as PaymentMethodObject, OverTheCounterParameterUpdate, PaymentType, Reusability,
+    VirtualAccountParameterUpdate,
+};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PaymentStatus {
     Active,
-    Expired, 
+    Expired,
     Inactive,
     Pending,
     RequiresAction,
     Failed,
     Succeeded,
-    XenditEnumDefaultFallback
+    XenditEnumDefaultFallback,
 }
 
 #[derive(Deserialize)]
@@ -28,7 +31,7 @@ pub struct Action {
     pub action: String,
     pub method: String,
     pub url_type: String,
-    pub url: String
+    pub url: String,
 }
 
 #[skip_serializing_none]
@@ -47,12 +50,12 @@ pub struct PaymentMethodBody {
     pub over_the_counter: Option<PaymentMethodObject::OverTheCounterParameter>,
     pub virtual_account: Option<PaymentMethodObject::VirtualAccountParameter>,
     pub qrcode: Option<PaymentMethodObject::QRCodeParameter>,
-    pub billing_information: Option<Address>
+    pub billing_information: Option<Address>,
 }
 impl PaymentMethodBody {
     pub fn new(
         r#type: PaymentMethodObject::PaymentType,
-        reusability: PaymentMethodObject::Reusability
+        reusability: PaymentMethodObject::Reusability,
     ) -> Self {
         Self {
             r#type,
@@ -68,7 +71,7 @@ impl PaymentMethodBody {
             over_the_counter: None,
             virtual_account: None,
             qrcode: None,
-            billing_information: None
+            billing_information: None,
         }
     }
     pub fn set_country(&mut self, country: PaymentMethodObject::PaymentCountry) -> &mut Self {
@@ -95,7 +98,10 @@ impl PaymentMethodBody {
         self.card = Some(card);
         self
     }
-    pub fn set_direct_debit(&mut self, direct_debit: PaymentMethodObject::DirectDebitParameter) -> &mut Self {
+    pub fn set_direct_debit(
+        &mut self,
+        direct_debit: PaymentMethodObject::DirectDebitParameter,
+    ) -> &mut Self {
         self.direct_debit = Some(direct_debit);
         self
     }
@@ -103,11 +109,17 @@ impl PaymentMethodBody {
         self.ewallet = Some(ewallet);
         self
     }
-    pub fn set_over_the_counter(&mut self, over_the_counter: PaymentMethodObject::OverTheCounterParameter) -> &mut Self {
+    pub fn set_over_the_counter(
+        &mut self,
+        over_the_counter: PaymentMethodObject::OverTheCounterParameter,
+    ) -> &mut Self {
         self.over_the_counter = Some(over_the_counter);
         self
     }
-    pub fn set_virtual_account(&mut self, virtual_account: PaymentMethodObject::VirtualAccountParameter) -> &mut Self {
+    pub fn set_virtual_account(
+        &mut self,
+        virtual_account: PaymentMethodObject::VirtualAccountParameter,
+    ) -> &mut Self {
         self.virtual_account = Some(virtual_account);
         self
     }
@@ -132,7 +144,7 @@ pub struct PaymentMethodUpdateBody {
     pub reusability: Option<Reusability>,
     pub status: Option<PaymentStatus>,
     pub over_the_counter: Option<OverTheCounterParameterUpdate>,
-    pub virtual_account: Option<VirtualAccountParameterUpdate>
+    pub virtual_account: Option<VirtualAccountParameterUpdate>,
 }
 impl PaymentMethodUpdateBody {
     pub fn new() -> Self {
@@ -142,7 +154,7 @@ impl PaymentMethodUpdateBody {
             reusability: None,
             status: None,
             over_the_counter: None,
-            virtual_account: None
+            virtual_account: None,
         }
     }
     pub fn set_description(&mut self, description: String) -> &mut Self {
@@ -161,11 +173,17 @@ impl PaymentMethodUpdateBody {
         self.status = Some(status);
         self
     }
-    pub fn set_over_the_counter(&mut self, over_the_counter: OverTheCounterParameterUpdate) -> &mut Self {
+    pub fn set_over_the_counter(
+        &mut self,
+        over_the_counter: OverTheCounterParameterUpdate,
+    ) -> &mut Self {
         self.over_the_counter = Some(over_the_counter);
         self
     }
-    pub fn set_virtual_account(&mut self, virtual_account: VirtualAccountParameterUpdate) -> &mut Self {
+    pub fn set_virtual_account(
+        &mut self,
+        virtual_account: VirtualAccountParameterUpdate,
+    ) -> &mut Self {
         self.virtual_account = Some(virtual_account);
         self
     }
@@ -183,7 +201,7 @@ pub struct GetPaymentByPaymentMethodIdParams {
     pub after_id: Option<String>,
     pub before_id: Option<String>,
     pub created: Option<DateFilter>,
-    pub updated: Option<DateFilter>
+    pub updated: Option<DateFilter>,
 }
 impl GetPaymentByPaymentMethodIdParams {
     pub fn new(payment_method_id: &str) -> Self {
@@ -195,7 +213,7 @@ impl GetPaymentByPaymentMethodIdParams {
             after_id: None,
             before_id: None,
             created: None,
-            updated: None
+            updated: None,
         }
     }
     pub fn set_reference_id(&mut self, reference_id: String) -> &mut Self {
@@ -254,7 +272,7 @@ impl GetPaymentMethodsParams {
             reference_id: None,
             limit: None,
             after_id: None,
-            before_id: None
+            before_id: None,
         }
     }
     pub fn set_id(&mut self, id: Vec<String>) -> &mut Self {
@@ -301,13 +319,13 @@ impl GetPaymentMethodsParams {
 #[derive(Serialize, Clone)]
 pub struct PaymentMethodExpireParams {
     pub success_return_url: Option<String>,
-    pub failure_return_url: Option<String>
+    pub failure_return_url: Option<String>,
 }
 impl PaymentMethodExpireParams {
     pub fn new(success_return_url: String, failure_return_url: String) -> Self {
         Self {
             success_return_url: Some(success_return_url),
-            failure_return_url: Some(failure_return_url)
+            failure_return_url: Some(failure_return_url),
         }
     }
 }
@@ -335,7 +353,7 @@ pub struct PaymentMethod {
     pub failure_code: Option<String>,
     pub created: DateTime<Utc>,
     pub updated: DateTime<Utc>,
-    pub metadata: Option<HashMap<String, Value>>
+    pub metadata: Option<HashMap<String, Value>>,
 }
 
 #[derive(Deserialize)]
@@ -349,76 +367,178 @@ pub struct Links {
 pub struct PaymentMethodList {
     pub data: Vec<PaymentMethod>,
     pub has_more: bool,
-    pub links: Option<Vec<Links>>
+    pub links: Option<Vec<Links>>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct SimulateResponse {
     pub status: String,
-    pub message: String
+    pub message: String,
 }
 
 pub struct PaymentMethodClient<'a> {
-    client: &'a XenditClient
+    client: &'a XenditClient,
 }
 impl<'a> PaymentMethodClient<'a> {
     pub fn new(client: &'a XenditClient) -> Self {
-        Self {
-            client
+        Self { client }
+    }
+    fn process_custom_header(&self, for_user_id: Option<String>) -> Option<HeaderMap> {
+        if for_user_id.is_none() {
+            return None;
         }
+        let mut headers = HeaderMap::new();
+        headers.insert("for-user-id", for_user_id.unwrap().parse().unwrap());
+        Some(headers)
     }
-    pub async fn create_payment_method(&self, body: PaymentMethodBody) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
-        let res = self.client.post::<PaymentMethod, PaymentMethodBody>("/v2/payment_methods", &body).await?;
+    pub async fn create_payment_method(
+        &self,
+        body: PaymentMethodBody,
+        for_user_id: Option<String>,
+    ) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .post::<PaymentMethod, PaymentMethodBody>(
+                "/v2/payment_methods",
+                &body,
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn get_payment_method_by_id(&self, id: &str) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
-        let res = self.client.get::<PaymentMethod>(&format!("v2/payment_methods/{}", id)).await?;
+    pub async fn get_payment_method_by_id(
+        &self,
+        id: &str,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .get::<PaymentMethod>(
+                &format!("v2/payment_methods/{}", id),
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn get_payments_by_payment_method_id(&self, id: String, params: Option<GetPaymentByPaymentMethodIdParams>) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
+    pub async fn get_payments_by_payment_method_id(
+        &self,
+        id: String,
+        params: Option<GetPaymentByPaymentMethodIdParams>,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
         let res = match params {
-            Some(p) =>
-                self.client.get_with_params::<PaymentMethodList, _>(
-                    &format!("v2/payment_methods/{}/payments", id), p
-                ).await?,
-            None => self.client.get::<PaymentMethodList>(&format!("v2/payment_methods/{}/payments", id)).await?
+            Some(p) => {
+                self.client
+                    .get_with_params::<PaymentMethodList, _>(
+                        &format!("v2/payment_methods/{}/payments", id),
+                        p,
+                        self.process_custom_header(for_user_id).as_ref(),
+                    )
+                    .await?
+            }
+            None => {
+                self.client
+                    .get::<PaymentMethodList>(
+                        &format!("v2/payment_methods/{}/payments", id),
+                        self.process_custom_header(for_user_id).as_ref(),
+                    )
+                    .await?
+            }
         };
         Ok(res)
     }
-    pub async fn patch_payment_method(&self, id: &str, body: PaymentMethodUpdateBody) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
-        let res = self.client.patch::<PaymentMethod, PaymentMethodUpdateBody>(&format!("v2/payment_methods/{}", id), &body).await?;
+    pub async fn patch_payment_method(
+        &self,
+        id: &str,
+        body: PaymentMethodUpdateBody,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .patch::<PaymentMethod, PaymentMethodUpdateBody>(
+                &format!("v2/payment_methods/{}", id),
+                &body,
+                self.process_custom_header(for_user_id).as_ref()
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn get_all_payment_methods(&self, params: Option<GetPaymentMethodsParams>) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
+    pub async fn get_all_payment_methods(
+        &self,
+        params: Option<GetPaymentMethodsParams>,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
         let res = match params {
-            Some(p) =>
-                self.client.get_with_params::<PaymentMethodList, _>(
-                    "/v2/payment_methods", p
-                ).await?,
-            None => self.client.get::<PaymentMethodList>("/v2/payment_methods").await?
+            Some(p) => {
+                self.client
+                    .get_with_params::<PaymentMethodList, _>(
+                        "/v2/payment_methods", 
+                        p,
+                        self.process_custom_header(for_user_id).as_ref()
+                    )
+                    .await?
+            }
+            None => {
+                self.client
+                    .get::<PaymentMethodList>(
+                        "/v2/payment_methods",
+                        self.process_custom_header(for_user_id).as_ref()
+                    )
+                    .await?
+            }
         };
         Ok(res)
     }
-    pub async fn expire_payment_method(&self, id: &str, params: Option<PaymentMethodExpireParams>) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
-        let res = self.client.post_with_params::<PaymentMethod, (), _>(
-            &format!("v2/payment_methods/{}/expire", id), &(), params
-        ).await?;
+    pub async fn expire_payment_method(
+        &self,
+        id: &str,
+        params: Option<PaymentMethodExpireParams>,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .post_with_params::<PaymentMethod, (), _>(
+                &format!("v2/payment_methods/{}/expire", id),
+                &(),
+                params,
+                self.process_custom_header(for_user_id).as_ref()
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn auth_payment_method(&self, id: &str, auth_code: &str) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
-        let body: HashMap<String, String> = [
-            ("auth_code".to_string(), auth_code.to_string())
-        ].into_iter().collect();
-        let res = self.client.post::<PaymentMethod, HashMap<String, String>>(
-            &format!("v2/payment_methods/{}/auth", id), &body).await?;
+    pub async fn auth_payment_method(
+        &self,
+        id: &str,
+        auth_code: &str,
+        for_user_id: Option<String>
+    ) -> Result<PaymentMethod, Box<dyn std::error::Error>> {
+        let body: HashMap<String, String> = [("auth_code".to_string(), auth_code.to_string())]
+            .into_iter()
+            .collect();
+        let res = self
+            .client
+            .post::<PaymentMethod, HashMap<String, String>>(
+                &format!("v2/payment_methods/{}/auth", id),
+                &body,
+                self.process_custom_header(for_user_id).as_ref()
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn simulate_payment(&self, id: &str, amount: f64) -> Result<SimulateResponse, Box<dyn std::error::Error>> {
-        let body: HashMap<String, f64> = [
-            ("amount".to_string(), amount)
-        ].into_iter().collect();
-        let res = self.client.post::<SimulateResponse, HashMap<String, f64>>(
-            &format!("/v2/payment_methods/{}/payments/simulate", id), &body).await?;
+    pub async fn simulate_payment(
+        &self,
+        id: &str,
+        amount: f64,
+    ) -> Result<SimulateResponse, Box<dyn std::error::Error>> {
+        let body: HashMap<String, f64> = [("amount".to_string(), amount)].into_iter().collect();
+        let res = self
+            .client
+            .post::<SimulateResponse, HashMap<String, f64>>(
+                &format!("/v2/payment_methods/{}/payments/simulate", id),
+                &body,
+                None
+            )
+            .await?;
         Ok(res)
     }
 }
