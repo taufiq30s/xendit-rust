@@ -1,9 +1,16 @@
 // Transaction
 
 use chrono::{DateTime, Utc};
+use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 
-use crate::{client::XenditClient, common::{currency::Currency, date_filter::DateFilter, transaction_channel::ChannelCategories, transaction_status::TransactionStatus, transaction_type::TransactionType}};
+use crate::{
+    client::XenditClient,
+    common::{
+        currency::Currency, date_filter::DateFilter, transaction_channel::ChannelCategories,
+        transaction_status::TransactionStatus, transaction_type::TransactionType,
+    },
+};
 
 #[derive(Serialize, Debug)]
 pub struct TransactionListParams {
@@ -40,20 +47,27 @@ impl TransactionListParams {
         }
     }
     pub fn set_types(&mut self, types: Vec<TransactionType>) -> &mut Self {
-        self.types = Some(
-            types.iter().map(|v| v.to_string()).collect::<Vec<String>>()
-        );
+        self.types = Some(types.iter().map(|v| v.to_string()).collect::<Vec<String>>());
         self
     }
     pub fn set_statuses(&mut self, statuses: Vec<TransactionStatus>) -> &mut Self {
         self.statuses = Some(
-            statuses.iter().map(|v| v.to_string()).collect::<Vec<String>>()
+            statuses
+                .iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<String>>(),
         );
         self
     }
-    pub fn set_channel_categories(&mut self, channel_categories: Vec<ChannelCategories>) -> &mut Self {
+    pub fn set_channel_categories(
+        &mut self,
+        channel_categories: Vec<ChannelCategories>,
+    ) -> &mut Self {
         self.channel_categories = Some(
-            channel_categories.iter().map(|v| v.to_string()).collect::<Vec<String>>()
+            channel_categories
+                .iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<String>>(),
         );
         self
     }
@@ -123,11 +137,11 @@ pub struct TransactionFee {
     pub value_added_tax: u64,
     pub xendit_withholding_tax: u64,
     pub third_party_withholding_tax: u64,
-    pub status: String
+    pub status: String,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
-#[allow(dead_code)] 
+#[allow(dead_code)]
 pub struct TransactionObject {
     pub id: String,
     pub product_id: String,
@@ -146,7 +160,7 @@ pub struct TransactionObject {
     pub updated: DateTime<Utc>,
     pub fee: TransactionFee,
     pub settlement_status: Option<String>,
-    pub estimated_settlement_time: Option<DateTime<Utc>>
+    pub estimated_settlement_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -158,29 +172,55 @@ pub struct TransactionLinks {
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
-#[allow(dead_code)] 
+#[allow(dead_code)]
 pub struct TransactionListObject {
     pub data: Vec<TransactionObject>,
     pub has_more: bool,
-    pub links: Option<Vec<TransactionLinks>>
+    pub links: Option<Vec<TransactionLinks>>,
 }
 
 pub struct TransactionClient<'a> {
-    client: &'a XenditClient
+    client: &'a XenditClient,
 }
 impl<'a> TransactionClient<'a> {
-    pub fn new (client: &'a XenditClient) -> Self {
-        Self {
-            client
-        }
+    pub fn new(client: &'a XenditClient) -> Self {
+        Self { client }
     }
-    pub async fn list(&self, params: TransactionListParams) -> Result<TransactionListObject, Box<dyn std::error::Error>> {
-        let result = self.client.get_with_params::<TransactionListObject, _>("/transactions", params).await?;
+    fn process_custom_header(&self, for_user_id: Option<String>) -> Option<HeaderMap> {
+        if for_user_id.is_none() {
+            return None;
+        }
+        let mut headers = HeaderMap::new();
+        headers.insert("for-user-id", for_user_id.unwrap().parse().unwrap());
+        Some(headers)
+    }
+    pub async fn list(
+        &self,
+        params: TransactionListParams,
+        for_user_id: Option<String>,
+    ) -> Result<TransactionListObject, Box<dyn std::error::Error>> {
+        let result = self
+            .client
+            .get_with_params::<TransactionListObject, _>(
+                "/transactions",
+                params,
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(result)
     }
-    pub async fn get(&self, id: String) -> Result<TransactionObject, Box<dyn std::error::Error>> {
-        let result = self.client.get(&format!("/transactions/{}", id)).await?;
+    pub async fn get(
+        &self,
+        id: String,
+        for_user_id: Option<String>,
+    ) -> Result<TransactionObject, Box<dyn std::error::Error>> {
+        let result = self
+            .client
+            .get(
+                &format!("/transactions/{}", id),
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(result)
     }
 }
-

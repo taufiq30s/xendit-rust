@@ -9,7 +9,7 @@ mod tests {
         dotenv().ok();
         let client = XenditClient::new(std::env::var("XENDIT_API_KEY").unwrap_or("".to_string()));
         assert!(
-            match BalanceClient::new(&client).get_balance(GetBalanceParams::new()).await {
+            match BalanceClient::new(&client).get_balance(GetBalanceParams::new(), None).await {
                 Ok(_) => true,
                 Err(e) => {
                     println!("Error: {}", e);
@@ -28,7 +28,8 @@ mod tests {
                 GetBalanceParams::new()
                     .set_account_type("HOLDING")
                     .set_currency("IDR")
-                    .build()
+                    .build(),
+                None
             ).await {
                 Ok(_) => true,
                 Err(e) => {

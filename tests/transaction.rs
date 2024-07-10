@@ -17,7 +17,8 @@ mod tests {
                 .set_statuses(vec![TransactionStatus::Success])
                 .set_channel_categories(vec![ChannelCategories::Ewallet, ChannelCategories::RetailOutlet])
                 .set_limit(2)
-                .build()
+                .build(),
+                None
             ).await {
                 Ok(_) => true,
                 Err(e) => {
@@ -59,7 +60,8 @@ mod tests {
         };
         match TransactionClient::new(&client)
         .get(
-            String::from("txn_c0f597f6-0361-4cd2-8c79-e195d17cd0e0")
+            String::from("txn_c0f597f6-0361-4cd2-8c79-e195d17cd0e0"),
+            None
         ).await {
             Ok(res) => assert_eq!(res, expected),
             Err(e) => panic!("Error: {}", e)

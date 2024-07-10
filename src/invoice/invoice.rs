@@ -1,10 +1,17 @@
 use chrono::{DateTime, Utc};
+use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::{client::XenditClient, common::currency::Currency};
 
-use super::{channel_object::Channel, customer_object::Customer, notification_preference::NotificationPreference, payment_object::{Bank, Ewallet, QRCode, RetailOutlet}, DirectDebit, Paylater, PaymentDetail};
+use super::{
+    channel_object::Channel,
+    customer_object::Customer,
+    notification_preference::NotificationPreference,
+    payment_object::{Bank, Ewallet, QRCode, RetailOutlet},
+    DirectDebit, Paylater, PaymentDetail,
+};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct InvoiceItem {
@@ -12,7 +19,7 @@ pub struct InvoiceItem {
     pub quantity: u64,
     pub price: f64,
     pub category: Option<String>,
-    pub url: Option<String>
+    pub url: Option<String>,
 }
 impl InvoiceItem {
     pub fn new(name: String, quantity: u64, price: f64) -> Self {
@@ -21,7 +28,7 @@ impl InvoiceItem {
             quantity,
             price,
             category: None,
-            url: None
+            url: None,
         }
     }
     pub fn set_category(&mut self, category: String) -> &mut Self {
@@ -38,7 +45,7 @@ impl InvoiceItem {
             quantity: self.quantity.clone(),
             price: self.price.clone(),
             category: self.category.clone(),
-            url: self.url.clone()
+            url: self.url.clone(),
         }
     }
 }
@@ -46,14 +53,11 @@ impl InvoiceItem {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct InvoiceFee {
     pub r#type: String,
-    pub value: f64
+    pub value: f64,
 }
 impl InvoiceFee {
     pub fn new(r#type: String, value: f64) -> Self {
-        Self {
-            r#type,
-            value
-        }
+        Self { r#type, value }
     }
 }
 
@@ -79,7 +83,7 @@ pub struct InvoiceBody {
     pub fees: Option<Vec<InvoiceFee>>,
     pub should_authenticate_credit_card: Option<bool>,
     pub channel_properties: Option<Channel>,
-    pub metadata: Option<serde_json::Value>
+    pub metadata: Option<serde_json::Value>,
 }
 impl InvoiceBody {
     pub fn new(external_id: String, amount: f64) -> Self {
@@ -103,7 +107,7 @@ impl InvoiceBody {
             fees: None,
             should_authenticate_credit_card: None,
             channel_properties: None,
-            metadata: None
+            metadata: None,
         }
     }
     pub fn set_description(&mut self, description: String) -> &mut Self {
@@ -114,7 +118,10 @@ impl InvoiceBody {
         self.customer = Some(customer);
         self
     }
-    pub fn set_customer_notification_preference(&mut self, customer_notification_preference: NotificationPreference) -> &mut Self {
+    pub fn set_customer_notification_preference(
+        &mut self,
+        customer_notification_preference: NotificationPreference,
+    ) -> &mut Self {
         self.customer_notification_preference = Some(customer_notification_preference);
         self
     }
@@ -138,7 +145,10 @@ impl InvoiceBody {
         self.currency = Some(currency.to_string());
         self
     }
-    pub fn set_callback_virtual_account_id(&mut self, callback_virtual_account_id: String) -> &mut Self {
+    pub fn set_callback_virtual_account_id(
+        &mut self,
+        callback_virtual_account_id: String,
+    ) -> &mut Self {
         self.callback_virtual_account_id = Some(callback_virtual_account_id);
         self
     }
@@ -166,7 +176,10 @@ impl InvoiceBody {
         self.fees = Some(fees);
         self
     }
-    pub fn set_should_authenticate_credit_card(&mut self, should_authenticate_credit_card: bool) -> &mut Self {
+    pub fn set_should_authenticate_credit_card(
+        &mut self,
+        should_authenticate_credit_card: bool,
+    ) -> &mut Self {
         self.should_authenticate_credit_card = Some(should_authenticate_credit_card);
         self
     }
@@ -199,7 +212,7 @@ impl InvoiceBody {
             fees: self.fees.clone(),
             should_authenticate_credit_card: self.should_authenticate_credit_card.clone(),
             channel_properties: self.channel_properties.clone(),
-            metadata: self.metadata.clone()
+            metadata: self.metadata.clone(),
         }
     }
 }
@@ -267,7 +280,7 @@ pub struct InvoiceCallback {
     pub bank_code: Option<String>,
     pub ewallet_type: Option<String>,
     pub on_demand_link: Option<String>,
-    pub receipt_id: Option<String>
+    pub receipt_id: Option<String>,
 }
 
 pub struct InvoiceClient<'a> {
@@ -275,24 +288,71 @@ pub struct InvoiceClient<'a> {
 }
 impl<'a> InvoiceClient<'a> {
     pub fn new(client: &'a XenditClient) -> Self {
-        Self {
-            client
+        Self { client }
+    }
+    fn process_custom_header(&self, for_user_id: Option<String>) -> Option<HeaderMap> {
+        if for_user_id.is_none() {
+            return None;
         }
+        let mut headers = HeaderMap::new();
+        headers.insert("for-user-id", for_user_id.unwrap().parse().unwrap());
+        Some(headers)
     }
-    pub async fn create(&self, body: InvoiceBody) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
-        let res = self.client.post::<InvoiceResponse, InvoiceBody>("/v2/invoices", &body).await?;
+    pub async fn create(
+        &self,
+        body: InvoiceBody,
+        for_user_id: Option<String>,
+    ) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .post::<InvoiceResponse, InvoiceBody>(
+                "/v2/invoices",
+                &body,
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn get(&self, id: String) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
-        let res = self.client.get::<InvoiceResponse>(&format!("/v2/invoices/{}", id)).await?;
+    pub async fn get(
+        &self,
+        id: String,
+        for_user_id: Option<String>,
+    ) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .get::<InvoiceResponse>(
+                &format!("/v2/invoices/{}", id),
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn expire(&self, id: String) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
-        let res = self.client.post::<InvoiceResponse, ()>(&format!("/invoices/{}/expire!", id), &()).await?;
+    pub async fn expire(
+        &self,
+        id: String,
+        for_user_id: Option<String>,
+    ) -> Result<InvoiceResponse, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .post::<InvoiceResponse, ()>(
+                &format!("/invoices/{}/expire!", id),
+                &(),
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
-    pub async fn list(&self) -> Result<Vec<InvoiceResponse>, Box<dyn std::error::Error>> {
-        let res = self.client.get::<Vec<InvoiceResponse>>("/v2/invoices").await?;
+    pub async fn list(
+        &self,
+        for_user_id: Option<String>,
+    ) -> Result<Vec<InvoiceResponse>, Box<dyn std::error::Error>> {
+        let res = self
+            .client
+            .get::<Vec<InvoiceResponse>>(
+                "/v2/invoices",
+                self.process_custom_header(for_user_id).as_ref(),
+            )
+            .await?;
         Ok(res)
     }
 }
