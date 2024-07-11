@@ -5,6 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Currency {
     IDR,
     USD,
@@ -12,16 +13,4 @@ pub enum Currency {
     VND,
     THB,
     MYR
-}
-impl Currency {
-    pub fn to_string(&self) -> String {
-        match self {
-            Currency::IDR => String::from("IDR"),
-            Currency::USD => String::from("USD"),
-            Currency::PHP => String::from("PHP"),
-            Currency::VND => String::from("VND"),
-            Currency::THB => String::from("THB"),
-            Currency::MYR => String::from("MYR"),
-        }
-    }
 }

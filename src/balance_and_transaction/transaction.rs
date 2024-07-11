@@ -7,20 +7,20 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::XenditClient,
     common::{
-        currency::Currency, date_filter::DateFilter, transaction_channel::ChannelCategories,
-        transaction_status::TransactionStatus, transaction_type::TransactionType, ListResponse,
+        date_filter::DateFilter, ChannelCategories, Currency, ListResponse, TransactionStatus,
+        TransactionType,
     },
 };
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct TransactionListParams {
-    types: Option<Vec<String>>,
-    statuses: Option<Vec<String>>,
-    channel_categories: Option<Vec<String>>,
+    types: Option<Vec<TransactionType>>,
+    statuses: Option<Vec<TransactionStatus>>,
+    channel_categories: Option<Vec<ChannelCategories>>,
     reference_id: Option<String>,
     product_id: Option<String>,
     account_identifier: Option<String>,
-    currency: Option<String>,
+    currency: Option<Currency>,
     amount: Option<String>,
     created: Option<DateFilter>,
     updated: Option<DateFilter>,
@@ -47,28 +47,18 @@ impl TransactionListParams {
         }
     }
     pub fn set_types(&mut self, types: Vec<TransactionType>) -> &mut Self {
-        self.types = Some(types.iter().map(|v| v.to_string()).collect::<Vec<String>>());
+        self.types = Some(types);
         self
     }
     pub fn set_statuses(&mut self, statuses: Vec<TransactionStatus>) -> &mut Self {
-        self.statuses = Some(
-            statuses
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>(),
-        );
+        self.statuses = Some(statuses);
         self
     }
     pub fn set_channel_categories(
         &mut self,
         channel_categories: Vec<ChannelCategories>,
     ) -> &mut Self {
-        self.channel_categories = Some(
-            channel_categories
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>(),
-        );
+        self.channel_categories = Some(channel_categories);
         self
     }
     pub fn set_reference_id(&mut self, reference_id: String) -> &mut Self {
@@ -84,7 +74,7 @@ impl TransactionListParams {
         self
     }
     pub fn set_currency(&mut self, currency: Currency) -> &mut Self {
-        self.currency = Some(currency.to_string());
+        self.currency = Some(currency);
         self
     }
     pub fn set_amount(&mut self, amount: String) -> &mut Self {
