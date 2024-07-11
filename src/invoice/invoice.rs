@@ -3,7 +3,7 @@ use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{client::XenditClient, common::currency::Currency};
+use crate::{client::XenditClient, common::Currency};
 
 use super::{
     channel_object::Channel,
@@ -73,7 +73,7 @@ pub struct InvoiceBody {
     pub success_redirect_url: Option<String>,
     pub failure_redirect_url: Option<String>,
     pub payment_methods: Option<Vec<String>>,
-    pub currency: Option<String>,
+    pub currency: Option<Currency>,
     pub callback_virtual_account_id: Option<String>,
     pub mid_label: Option<String>,
     pub reminder_time_unit: Option<String>,
@@ -142,7 +142,7 @@ impl InvoiceBody {
         self
     }
     pub fn set_currency(&mut self, currency: Currency) -> &mut Self {
-        self.currency = Some(currency.to_string());
+        self.currency = Some(currency);
         self
     }
     pub fn set_callback_virtual_account_id(
