@@ -48,29 +48,35 @@ impl fmt::Display for ApiErrorResponse {
 pub struct ApiErrorDetail {
     field: Option<Vec<String>>,
     location: Option<String>,
-    path: Option<String>,
+    path: Option<serde_json::Value>,
     message: Option<String>,
     messages: Option<Vec<String>>,
     types: Option<Vec<String>>,
+    context: Option<serde_json::Value>,
 }
 impl fmt::Debug for ApiErrorDetail {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.field {
-            Some(_) => write!(
-                f,
+        if let Some(field) = &self.field {
+            return writeln!(f, 
                 "\n\tfield: {:?}, location: {:?}, messages: {:?}, types: {:?}",
-                self.field.as_ref().unwrap(),
+                field,
                 self.location.as_ref().unwrap(),
                 self.messages.as_ref().unwrap(),
-                self.types.as_ref().unwrap()
-            ),
-            None => write!(
-                f,
-                "\n\tpath: {:?}, message: {:?}",
-                self.path.as_ref().unwrap(),
-                self.message.as_ref().unwrap()
-            ),
+                self.types.as_ref().unwrap());
         }
+        else if let Some(context) = &self.context {
+            return writeln!(f,
+                "\n\tpath: {:}\n\tcontext: {:}",
+                self.path.as_ref().unwrap(),
+                context);
+        }
+        write!(
+            f,
+            "\n\tpath: {:?}, message: {:?}, context: {:?}",
+            self.path.as_ref().unwrap(),
+            self.message.as_ref().unwrap(),
+            self.context.as_ref().unwrap()
+        )
     }
 }
 
@@ -139,7 +145,6 @@ impl XenditClient {
     ) -> Result<T, Box<dyn std::error::Error>> {
         let url: String = format!("{}/{}", API_BASE_URL, endpoint);
         let headers = self.preprocess_header(custom_headers);
-
         let request_builder: reqwest::RequestBuilder = self.client.post(&url).headers(headers);
         let response = match serde_json::to_value(body)?.is_null() {
             true => request_builder.send().await?,
