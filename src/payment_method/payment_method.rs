@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::skip_serializing_none;
 
-use crate::{client::XenditClient, common::date_filter::DateFilter, invoice::Address};
+use crate::{client::XenditClient, common::{date_filter::DateFilter, ListResponse}, invoice::Address};
 
 use super::payment_method_parameters::{
     self as PaymentMethodObject, OverTheCounterParameterUpdate, PaymentType, Reusability,
@@ -356,20 +356,6 @@ pub struct PaymentMethod {
     pub metadata: Option<HashMap<String, Value>>,
 }
 
-#[derive(Deserialize)]
-pub struct Links {
-    pub href: String,
-    pub method: String,
-    pub rel: String,
-}
-
-#[derive(Deserialize)]
-pub struct PaymentMethodList {
-    pub data: Vec<PaymentMethod>,
-    pub has_more: bool,
-    pub links: Option<Vec<Links>>,
-}
-
 #[derive(Deserialize, Debug)]
 pub struct SimulateResponse {
     pub status: String,
@@ -425,11 +411,11 @@ impl<'a> PaymentMethodClient<'a> {
         id: String,
         params: Option<GetPaymentByPaymentMethodIdParams>,
         for_user_id: Option<String>
-    ) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
+    ) -> Result<ListResponse<PaymentMethod>, Box<dyn std::error::Error>> {
         let res = match params {
             Some(p) => {
                 self.client
-                    .get_with_params::<PaymentMethodList, _>(
+                    .get_with_params::<ListResponse<PaymentMethod>, _>(
                         &format!("v2/payment_methods/{}/payments", id),
                         p,
                         self.process_custom_header(for_user_id).as_ref(),
@@ -438,7 +424,7 @@ impl<'a> PaymentMethodClient<'a> {
             }
             None => {
                 self.client
-                    .get::<PaymentMethodList>(
+                    .get::<ListResponse<PaymentMethod>>(
                         &format!("v2/payment_methods/{}/payments", id),
                         self.process_custom_header(for_user_id).as_ref(),
                     )
@@ -467,11 +453,11 @@ impl<'a> PaymentMethodClient<'a> {
         &self,
         params: Option<GetPaymentMethodsParams>,
         for_user_id: Option<String>
-    ) -> Result<PaymentMethodList, Box<dyn std::error::Error>> {
+    ) -> Result<ListResponse<PaymentMethod>, Box<dyn std::error::Error>> {
         let res = match params {
             Some(p) => {
                 self.client
-                    .get_with_params::<PaymentMethodList, _>(
+                    .get_with_params::<ListResponse<PaymentMethod>, _>(
                         "/v2/payment_methods", 
                         p,
                         self.process_custom_header(for_user_id).as_ref()
@@ -480,7 +466,7 @@ impl<'a> PaymentMethodClient<'a> {
             }
             None => {
                 self.client
-                    .get::<PaymentMethodList>(
+                    .get::<ListResponse<PaymentMethod>>(
                         "/v2/payment_methods",
                         self.process_custom_header(for_user_id).as_ref()
                     )

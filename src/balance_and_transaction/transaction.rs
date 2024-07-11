@@ -8,7 +8,7 @@ use crate::{
     client::XenditClient,
     common::{
         currency::Currency, date_filter::DateFilter, transaction_channel::ChannelCategories,
-        transaction_status::TransactionStatus, transaction_type::TransactionType,
+        transaction_status::TransactionStatus, transaction_type::TransactionType, ListResponse,
     },
 };
 
@@ -163,22 +163,6 @@ pub struct TransactionObject {
     pub estimated_settlement_time: Option<DateTime<Utc>>,
 }
 
-#[derive(Deserialize, PartialEq, Debug)]
-#[allow(dead_code)]
-pub struct TransactionLinks {
-    pub href: String,
-    pub method: String,
-    pub rel: String,
-}
-
-#[derive(Deserialize, PartialEq, Debug)]
-#[allow(dead_code)]
-pub struct TransactionListObject {
-    pub data: Vec<TransactionObject>,
-    pub has_more: bool,
-    pub links: Option<Vec<TransactionLinks>>,
-}
-
 pub struct TransactionClient<'a> {
     client: &'a XenditClient,
 }
@@ -198,10 +182,10 @@ impl<'a> TransactionClient<'a> {
         &self,
         params: TransactionListParams,
         for_user_id: Option<String>,
-    ) -> Result<TransactionListObject, Box<dyn std::error::Error>> {
+    ) -> Result<ListResponse<TransactionObject>, Box<dyn std::error::Error>> {
         let result = self
             .client
-            .get_with_params::<TransactionListObject, _>(
+            .get_with_params::<ListResponse<TransactionObject>, _>(
                 "/transactions",
                 params,
                 self.process_custom_header(for_user_id).as_ref(),
