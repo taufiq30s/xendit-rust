@@ -59,7 +59,7 @@ pub struct CardInformation {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CardParameter {
     pub currency: Currency,
-    pub channel: CardChannelProperties,
+    pub channel_properties: CardChannelProperties,
     pub card_information: CardInformation
 }
 impl CardParameter {
@@ -71,7 +71,7 @@ impl CardParameter {
     ) -> Self {
         Self {
             currency,
-            channel: CardChannelProperties {
+            channel_properties: CardChannelProperties {
                 skip_three_d_secure: None,
                 success_return_url: None,
                 failure_return_url: None,
@@ -88,23 +88,23 @@ impl CardParameter {
         }
     }
     pub fn set_skip_three_d_secure(&mut self, skip_three_d_secure: bool) -> &mut Self {
-        self.channel.skip_three_d_secure = Some(skip_three_d_secure);
+        self.channel_properties.skip_three_d_secure = Some(skip_three_d_secure);
         self
     }
     pub fn set_success_return_url(&mut self, success_return_url: String) -> &mut Self {
-        self.channel.success_return_url = Some(success_return_url);
+        self.channel_properties.success_return_url = Some(success_return_url);
         self
     }
     pub fn set_failure_return_url(&mut self, failure_return_url: String) -> &mut Self {
-        self.channel.failure_return_url = Some(failure_return_url);
+        self.channel_properties.failure_return_url = Some(failure_return_url);
         self
     }
     pub fn set_cardonfile_type(&mut self, cardonfile_type: String) -> &mut Self {
-        self.channel.cardonfile_type = Some(cardonfile_type);
+        self.channel_properties.cardonfile_type = Some(cardonfile_type);
         self
     }
     pub fn set_expires_at(&mut self, expires_at: DateTime<Utc>) -> &mut Self {
-        self.channel.expires_at = Some(expires_at);
+        self.channel_properties.expires_at = Some(expires_at);
         self
     }
     pub fn set_cardholder_name(&mut self, cardholder_name: String) -> &mut Self {
