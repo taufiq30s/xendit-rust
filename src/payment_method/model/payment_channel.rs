@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum EWallet {
+pub enum EWalletChannel {
     Dana,
     Ovo,
     Linkaja,
@@ -25,7 +25,7 @@ pub enum EWallet {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum DirectDebit {
+pub enum DirectDebitChannel {
     Bri,
     Mandiri,
     Bpi,
@@ -81,7 +81,7 @@ pub enum DirectDebit {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum OverTheCounter {
+pub enum OverTheCounterChannel {
     Alfamart,
     Indomaret,
     Sevenelevencodeconnect,
@@ -95,7 +95,7 @@ pub enum OverTheCounter {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum VirtualAccount {
+pub enum VirtualAccountChannel {
     Bca,
     Bsi,
     Bjb,
@@ -114,7 +114,7 @@ pub enum VirtualAccount {
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum QRCode {
+pub enum QRCodeChannel {
     Dana,
     Linkaja,
     Promptpay,
