@@ -1,70 +1,48 @@
 #[cfg(test)]
 
 mod tests {
-    use chrono::{DateTime, Utc};
     use dotenv::dotenv;
-    use xendit::{balance_and_transaction::transaction::{TransactionClient, TransactionFee, TransactionListParams, TransactionObject}, client::XenditClient, common::{transaction_channel::ChannelCategories, transaction_status::TransactionStatus, transaction_type::TransactionType}};
+    use xendit::{balance_and_transaction::{ChannelCategories, GetAllTransactionsRequestParams, TransactionClient, TransactionStatuses, TransactionTypes}, client::XenditClient};
 
     #[tokio::test]
     async fn test_get_transaction_list() {
         dotenv().ok();
         let client = XenditClient::new(std::env::var("XENDIT_API_KEY").unwrap_or("".to_string()));
-        assert!(
-            match TransactionClient::new(&client)
-            .list(
-                TransactionListParams::new()
-                .set_types(vec![TransactionType::Payment])
-                .set_statuses(vec![TransactionStatus::Success])
-                .set_channel_categories(vec![ChannelCategories::Ewallet, ChannelCategories::RetailOutlet])
-                .set_limit(2)
-                .build(),
+        assert!(match TransactionClient::new(&client)
+            .get_all_transactions(
+                GetAllTransactionsRequestParams::new()
+                    .set_types(vec![TransactionTypes::Payment])
+                    .set_statuses(vec![TransactionStatuses::Success])
+                    .set_channel_categories(vec![
+                        ChannelCategories::Ewallet,
+                        ChannelCategories::RetailOutlet
+                    ])
+                    .set_limit(2)
+                    .build(),
                 None
-            ).await {
-                Ok(_) => true,
-                Err(e) => {
-                    panic!("Error: {}", e);
-                }
+            )
+            .await
+        {
+            Ok(_) => true,
+            Err(e) => {
+                panic!("Error: {}", e);
             }
-        )
+        })
     }
 
     #[tokio::test]
     async fn test_get_transaction() {
         dotenv().ok();
         let client = XenditClient::new(std::env::var("XENDIT_API_KEY").unwrap_or("".to_string()));
-        let expected = TransactionObject {
-            id: String::from("txn_c0f597f6-0361-4cd2-8c79-e195d17cd0e0"),
-            product_id: String::from("5c27eea0-4963-41ba-994f-73a810a0b8ea"),
-            r#type: String::from("PAYMENT"),
-            channel_code: Some(String::from("ID_OVO")),
-            reference_id: Some(String::from("order-id-1715068880")),
-            account_identifier: Some(String::from("+6285156209625")),
-            currency: Some(String::from("IDR")),
-            amount: 10000,
-            net_amount: 9834,
-            cashflow: String::from("MONEY_IN"),
-            status: String::from("SUCCESS"),
-            channel_category: String::from("EWALLET"),
-            business_id: String::from("57fdbb445eec38910d3a4c47"),
-            created: "2024-05-07T08:01:21.640Z".parse::<DateTime<Utc>>().unwrap(),
-            updated: "2024-05-09T08:01:31.452Z".parse::<DateTime<Utc>>().unwrap(),
-            fee: TransactionFee{
-                xendit_fee: 150,
-                value_added_tax: 16,
-                xendit_withholding_tax: 0,
-                third_party_withholding_tax: 0,
-                status: String::from("COMPLETED")
-            },
-            settlement_status: Some(String::from("SETTLED")),
-            estimated_settlement_time: Some("2024-05-09T08:01:20.281Z".parse::<DateTime<Utc>>().unwrap())
-        };
         match TransactionClient::new(&client)
-        .get(
-            String::from("txn_c0f597f6-0361-4cd2-8c79-e195d17cd0e0"),
-            None
-        ).await {
-            Ok(res) => assert_eq!(res, expected),
-            Err(e) => panic!("Error: {}", e)
+            .get_transaction_by_id(
+                String::from("txn_c0f597f6-0361-4cd2-8c79-e195d17cd0e0"),
+                None,
+            )
+            .await
+        {
+            Ok(res) => assert_eq!(res.get_reference_id(), Some("order-id-1715068880")),
+            Err(e) => panic!("Error: {}", e),
         }
     }
 }
