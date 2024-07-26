@@ -2,14 +2,14 @@
 mod tests {
 
     use dotenv::dotenv;
-    use xendit::{balance_and_transaction::balance::{BalanceClient, GetBalanceParams}, client::XenditClient};
+    use xendit::{balance_and_transaction::{BalanceClient, GetBalanceRequestParams}, client::XenditClient, common::Currency};
 
     #[tokio::test]
     async fn test_get_balance_default() {
         dotenv().ok();
         let client = XenditClient::new(std::env::var("XENDIT_API_KEY").unwrap_or("".to_string()));
         assert!(
-            match BalanceClient::new(&client).get_balance(GetBalanceParams::new(), None).await {
+            match BalanceClient::new(&client).get_balance(GetBalanceRequestParams::new(), None).await {
                 Ok(_) => true,
                 Err(e) => {
                     println!("Error: {}", e);
@@ -25,9 +25,9 @@ mod tests {
         let client = XenditClient::new(std::env::var("XENDIT_API_KEY").unwrap_or("".to_string()));
         assert!(
             match BalanceClient::new(&client).get_balance(
-                GetBalanceParams::new()
+                GetBalanceRequestParams::new()
                     .set_account_type("HOLDING")
-                    .set_currency("IDR")
+                    .set_currency(Currency::IDR)
                     .build(),
                 None
             ).await {
