@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::{common::DateFilter, payment_method::PaymentStatus};
+use crate::{common::DateRangeFilter, payment_method::PaymentStatus};
 
 #[derive(Serialize, Clone)]
 pub struct GetPaymentByPaymentMethodIdParams {
@@ -10,8 +10,8 @@ pub struct GetPaymentByPaymentMethodIdParams {
     limit: Option<i64>,
     after_id: Option<String>,
     before_id: Option<String>,
-    created: Option<DateFilter>,
-    updated: Option<DateFilter>,
+    created: Option<DateRangeFilter>,
+    updated: Option<DateRangeFilter>,
 }
 impl GetPaymentByPaymentMethodIdParams {
     pub fn new(payment_method_id: &str) -> Self {
@@ -68,17 +68,17 @@ impl GetPaymentByPaymentMethodIdParams {
         self.before_id = Some(before_id);
         self
     }
-    pub fn get_created(&self) -> Option<&DateFilter> {
+    pub fn get_created(&self) -> Option<&DateRangeFilter> {
         self.created.as_ref()
     }
-    pub fn set_created(&mut self, created: DateFilter) -> &mut Self {
+    pub fn set_created(&mut self, created: DateRangeFilter) -> &mut Self {
         self.created = Some(created);
         self
     }
-    pub fn get_updated(&self) -> Option<&DateFilter> {
+    pub fn get_updated(&self) -> Option<&DateRangeFilter> {
         self.updated.as_ref()
     }
-    pub fn set_updated(&mut self, updated: DateFilter) -> &mut Self {
+    pub fn set_updated(&mut self, updated: DateRangeFilter) -> &mut Self {
         self.updated = Some(updated);
         self
     }
