@@ -75,7 +75,7 @@ impl fmt::Debug for ApiErrorDetail {
             "\n\tpath: {:?}, message: {:?}, context: {:?}",
             self.path.as_ref().unwrap(),
             self.message.as_ref().unwrap(),
-            self.context.as_ref().unwrap()
+            self.context.as_ref().unwrap_or(&serde_json::Value::String(String::new()))
         )
     }
 }
