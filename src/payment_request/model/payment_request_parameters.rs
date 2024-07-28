@@ -27,7 +27,7 @@ pub enum Initiator {
 
 #[skip_serializing_none]
 #[derive(Serialize, Clone)]
-pub struct PaymentRequestBody {
+pub struct PaymentRequestParameters {
     currency: Currency,
     reference_id: Option<String>,
     amount: Option<f64>,
@@ -43,7 +43,7 @@ pub struct PaymentRequestBody {
     customer: Option<HashMap<String, serde_json::Value>>,
     metadata: Option<HashMap<String, serde_json::Value>>,
 }
-impl PaymentRequestBody {
+impl PaymentRequestParameters {
     pub fn new(currency: Currency) -> Self {
         Self {
             currency,

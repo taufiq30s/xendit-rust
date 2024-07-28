@@ -1,4 +1,4 @@
-pub mod payment_request_body;
+pub mod payment_request_parameters;
 pub mod channel_properties;
 pub mod shipping_information;
 pub mod basket_item;
@@ -9,7 +9,7 @@ pub mod capture;
 pub mod payment_simulation;
 pub mod payment_callback;
 
-pub use payment_request_body::*;
+pub use payment_request_parameters::*;
 pub use channel_properties::*;
 pub use shipping_information::*;
 pub use basket_item::*;
