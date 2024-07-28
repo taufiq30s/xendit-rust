@@ -10,7 +10,7 @@ mod tests {
             Reusability, VirtualAccountChannel, VirtualAccountChannelProperties,
             VirtualAccountParameter,
         },
-        payment_request::{PaymentRequestBody, PaymentRequestClient},
+        payment_request::{PaymentRequestClient, PaymentRequestParameters},
     };
 
     fn initialize_client() -> XenditClient {
@@ -21,7 +21,7 @@ mod tests {
     #[tokio::test]
     async fn test_create_payment_request() {
         let client = initialize_client();
-        let body = PaymentRequestBody::new(Currency::IDR)
+        let body = PaymentRequestParameters::new(Currency::IDR)
             .set_amount(150000.0)
             .set_payment_method(
                 PaymentMethodBody::new(PaymentType::Ewallet, Reusability::OneTimeUse)
@@ -41,7 +41,7 @@ mod tests {
             .build();
 
         assert!(match PaymentRequestClient::new(&client)
-            .create(body, None, None)
+            .create_payment_request(body, None, None)
             .await
         {
             Ok(payment_request) => !payment_request.get_id().is_empty(),
@@ -57,7 +57,7 @@ mod tests {
         let client = initialize_client();
 
         // Create Payment Request First
-        let body = PaymentRequestBody::new(Currency::IDR)
+        let body = PaymentRequestParameters::new(Currency::IDR)
             .set_amount(150000.0)
             .set_payment_method(
                 PaymentMethodBody::new(PaymentType::VirtualAccount, Reusability::OneTimeUse)
@@ -75,12 +75,12 @@ mod tests {
             .set_customer_id(String::from("cust-b9a2f48e-bc3d-40b1-84b3-c8cb1c82349b"))
             .build();
         let payment_request = PaymentRequestClient::new(&client)
-            .create(body, None, None)
+            .create_payment_request(body, None, None)
             .await
             .unwrap();
 
         assert!(match PaymentRequestClient::new(&client)
-            .get(payment_request.get_id().to_string(), None)
+            .get_payment_request_by_id(payment_request.get_id().to_string(), None)
             .await
         {
             Ok(payment_request) => !payment_request.get_id().is_empty(),
@@ -96,7 +96,7 @@ mod tests {
         let client = initialize_client();
 
         assert!(
-            match PaymentRequestClient::new(&client).get_all(None).await {
+            match PaymentRequestClient::new(&client).get_all_payment_requests(None).await {
                 Ok(payment_request_list) => !payment_request_list.get_data().is_empty(),
                 Err(e) => {
                     println!("{}", e);
