@@ -1,6 +1,6 @@
 [package]
 name = "xendit"
-version = "0.0.1"
+version = "0.0.2"
 description = "Xendit Rust SDK"
 authors = ["Hanjara Adhyatma"]
 edition = "2021"
@@ -8,8 +8,8 @@ license = "MIT"
 homepage = "https://x.com/papanberjalan"
 repository = "https://github.com/mashanz/xendit-rust"
 readme = "README.md"
-keywords = ["xendit", "sdk"]
-categories = ["xendit", "sdk"]
+keywords = ["finance"]
+categories = ["finance"]
 
 [dependencies]
 chrono = {version = "0.4.38", features = ["serde"]}
